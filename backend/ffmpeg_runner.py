@@ -29,8 +29,15 @@ class FFmpegRunner:
 
     def _drain(self):
         if self.proc and self.proc.stderr:
-            for _ in iter(lambda: self.proc.stderr.readline(), b''):
-                pass
+            try:
+                while self.proc.poll() is None:
+                    line = self.proc.stderr.readline()
+                    if not line:
+                        break
+                    # Optionally log or process the output here
+                    # print(line.decode('utf-8', errors='replace').strip())
+            except Exception as e:
+                print(f"Error draining stderr: {e}")
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
